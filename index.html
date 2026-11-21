@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Spendvizo — track expenses, manage budgets, and understand your money. No login required.">
+  <title>Spendvizo — Personal Finance Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Spendvizo home"><span class="brand-mark">S</span><span>Spend<span class="brand-accent">vizo</span></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard"><span>▦</span> Dashboard</button>
+        <button class="nav-item" data-view="transactions"><span>⇄</span> Transactions</button>
+        <button class="nav-item" data-view="budget"><span>◎</span> Budget</button>
+        <button class="nav-item" data-view="reports"><span>▥</span> Reports</button>
+      </nav>
+      <div class="side-label side-label-bottom">PREFERENCES</div>
+      <nav class="nav">
+        <button class="nav-item" id="exportBtn"><span>⇩</span> Export CSV</button>
+        <button class="nav-item" id="backupBtn"><span>◫</span> Backup data</button>
+        <button class="nav-item" id="restoreBtn"><span>↥</span> Restore backup</button>
+        <input type="file" id="restoreInput" accept="application/json" hidden>
+      </nav>
+      <div class="sidebar-note"><div class="note-icon">✦</div><b>Your money, clearer.</b><p>Small steps today. Better control tomorrow.</p></div>
+      <div class="sidebar-footer"><span class="online-dot"></span> Saved on this device</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
+        <div><div class="eyebrow">PERSONAL FINANCE</div><h1 id="pageTitle">Dashboard</h1></div>
+        <div class="top-actions">
+          <label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search transactions..." aria-label="Search transactions"></label>
+          <button class="icon-btn" id="themeBtn" title="Toggle theme">☼</button>
+          <button class="primary-btn" id="topAddBtn">＋ Add transaction</button>
+        </div>
+      </header>
+
+      <section class="view active" id="dashboardView">
+        <div class="welcome-row"><div><h2>Good money habits start here.</h2><p>A simple view of where your money goes.</p></div><div class="month-chip">◷ <span id="currentMonth"></span></div></div>
+        <div class="stats-grid">
+          <article class="stat-card income-card"><div class="stat-top"><span>Total income</span><span class="stat-icon">↙</span></div><div class="stat-value" id="incomeTotal">₹0</div><div class="stat-foot">Money received this month</div></article>
+          <article class="stat-card expense-card"><div class="stat-top"><span>Total expenses</span><span class="stat-icon">↗</span></div><div class="stat-value" id="expenseTotal">₹0</div><div class="stat-foot">Money spent this month</div></article>
+          <article class="stat-card savings-card"><div class="stat-top"><span>Net balance</span><span class="stat-icon">◇</span></div><div class="stat-value" id="balanceTotal">₹0</div><div class="stat-foot">Income minus expenses</div></article>
+          <article class="stat-card budget-card"><div class="stat-top"><span>Budget remaining</span><span class="stat-icon">◎</span></div><div class="stat-value" id="budgetRemaining">₹0</div><div class="stat-foot" id="budgetFoot">Set a monthly budget</div></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel chart-panel"><div class="panel-heading"><div><h3>Spending by category</h3><p>Where your money went this month</p></div><span class="panel-badge">THIS MONTH</span></div><div class="donut-wrap"><div class="donut" id="donut"><div class="donut-center"><b id="donutTotal">₹0</b><span>Total spent</span></div></div><div class="legend" id="categoryLegend"><div class="empty-state">Add expenses to see your breakdown.</div></div></div></article>
+          <article class="panel chart-panel"><div class="panel-heading"><div><h3>Cash flow</h3><p>Income vs expenses · last 6 months</p></div><span class="panel-badge">6 MONTHS</span></div><div class="bar-chart" id="cashflowChart"><div class="empty-state">Your monthly cash flow will appear here.</div></div><div class="chart-legend"><span><i class="legend-dot green"></i> Income</span><span><i class="legend-dot pink"></i> Expenses</span></div></article>
+        </div>
+        <article class="panel transactions-panel"><div class="panel-heading"><div><h3>Recent transactions</h3><p>Your latest money activity</p></div><button class="text-btn" data-goto="transactions">View all →</button></div><div class="table-wrap"><table><thead><tr><th>DETAIL</th><th>CATEGORY</th><th>DATE</th><th class="align-right">AMOUNT</th><th></th></tr></thead><tbody id="recentRows"></tbody></table></div><div class="empty-state hidden" id="recentEmpty">No transactions yet. Add your first income or expense.</div></article>
+      </section>
+
+      <section class="view" id="transactionsView">
+        <div class="section-intro"><div><h2>Transactions</h2><p>Review, search, edit, or remove your activity.</p></div><button class="primary-btn" id="transactionsAddBtn">＋ Add transaction</button></div>
+        <article class="panel"><div class="filter-row">
+          <input id="transactionSearch" class="field" placeholder="Search description...">
+          <input id="amountFilter" class="field amount-filter" type="number" min="0" step="0.01" placeholder="Exact amount (₹)" aria-label="Filter by exact amount">
+          <select id="categoryFilter" class="field"><option value="all">All categories</option></select>
+          <select id="typeFilter" class="field"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expenses</option></select>
+          <select id="monthFilter" class="field"><option value="all">All months</option></select>
+          <button type="button" class="secondary-btn clear-filters" id="clearFiltersBtn">Clear filters</button>
+        </div>
+        <p class="filter-help">Use any filter on its own: enter an amount to find it across every category, or choose a category to see all spending in it. You can also combine filters.</p><div class="table-wrap"><table><thead><tr><th>DETAIL</th><th>CATEGORY</th><th>DATE</th><th>TYPE</th><th class="align-right">AMOUNT</th><th></th></tr></thead><tbody id="allRows"></tbody></table></div><div class="empty-state hidden" id="allEmpty">No matching transactions found.</div></article>
+      </section>
+
+      <section class="view" id="budgetView">
+        <div class="section-intro"><div><h2>Monthly budget</h2><p>Give your spending a limit and stay in control.</p></div></div>
+        <article class="panel budget-editor"><div><span class="eyebrow">YOUR MONTHLY LIMIT</span><h2 id="budgetDisplay">₹0</h2><p id="budgetSummary">Set a budget to start tracking your progress.</p></div><form id="budgetForm" class="budget-form"><label for="budgetInput">Budget amount (₹)</label><div class="inline-form"><input class="field" id="budgetInput" type="number" min="0" step="1" placeholder="e.g. 15000" required><button class="primary-btn">Save budget</button></div></form></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Budget progress</h3><p>Current month's expenses</p></div></div><div class="progress-track"><div id="budgetProgress" class="progress-fill"></div></div><div class="progress-meta"><span id="budgetSpent">₹0 spent</span><b id="budgetPercent">0%</b><span id="budgetLeft">₹0 left</span></div><div id="budgetMessage" class="budget-message">Add a budget to see your progress.</div></article>
+      </section>
+
+      <section class="view" id="reportsView">
+        <div class="section-intro"><div><h2>Reports</h2><p>A quick summary of your money activity.</p></div></div>
+        <div class="stats-grid report-stats"><article class="stat-card income-card"><div class="stat-top"><span>All-time income</span><span class="stat-icon">↙</span></div><div class="stat-value" id="allIncome">₹0</div></article><article class="stat-card expense-card"><div class="stat-top"><span>All-time expenses</span><span class="stat-icon">↗</span></div><div class="stat-value" id="allExpenses">₹0</div></article><article class="stat-card savings-card"><div class="stat-top"><span>All-time net</span><span class="stat-icon">◇</span></div><div class="stat-value" id="allNet">₹0</div></article><article class="stat-card budget-card"><div class="stat-top"><span>Transactions</span><span class="stat-icon">#</span></div><div class="stat-value" id="allCount">0</div></article></div>
+        <article class="panel"><div class="panel-heading"><div><h3>Expense categories</h3><p>Lifetime spending grouped by category</p></div></div><div id="reportCategories" class="report-categories"><div class="empty-state">Your category report will appear here.</div></div></article>
+      </section>
+
+      <footer class="main-footer"><span>Spendvizo © <span id="year"></span></span><span>Private by design · No account required</span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="transactionModal">
+    <form class="modal" id="transactionForm">
+      <div class="modal-heading"><div><span class="eyebrow">MONEY ACTIVITY</span><h2 id="modalTitle">Add transaction</h2></div><button type="button" class="icon-btn" id="closeModal" aria-label="Close">×</button></div>
+      <div class="type-switch"><button type="button" class="type-option active" data-type="expense">Expense</button><button type="button" class="type-option" data-type="income">Income</button></div>
+      <input type="hidden" id="transactionId"><input type="hidden" id="transactionType" value="expense">
+      <label for="amountInput">Amount (₹)</label><input class="field" id="amountInput" type="number" min="0.01" step="0.01" placeholder="e.g. 450" required>
+      <label for="categoryInput">Category</label><select class="field" id="categoryInput" required></select>
+      <label for="descriptionInput">Description</label><input class="field" id="descriptionInput" maxlength="80" placeholder="e.g. Lunch, electricity bill" required>
+      <label for="dateInput">Date</label><input class="field" id="dateInput" type="date" required>
+      <div class="modal-actions"><button type="button" class="secondary-btn" id="cancelModal">Cancel</button><button class="primary-btn">Save transaction</button></div>
+      <p class="form-error" id="formError" role="alert"></p>
+    </form>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
