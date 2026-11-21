@@ -16,3 +16,12 @@ body.light{--bg:#f3f5fb;--sidebar:#fff;--panel:#fff;--panel2:#f5f6fc;--line:#dfe
 .filter-help{font-size:10px;color:var(--muted);margin:-5px 0 15px;line-height:1.5}
 .clear-filters{white-space:nowrap;padding:10px 12px;font-size:10px}
 @media(max-width:760px){.filter-help{margin-top:0}.clear-filters{flex:1 1 100%}}
+
+/* Download report format chooser */
+.export-description{color:var(--muted);font-size:12px;line-height:1.5;margin:0 0 16px}
+.export-choice{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:14px;margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);cursor:pointer;transition:border-color .2s,transform .2s}
+.export-choice:hover{border-color:#9874ed;transform:translateY(-1px)}
+.export-choice-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:11px;font-size:22px;font-weight:800}
+.excel-icon{background:#143d32;color:#54d6a0}.pdf-icon{background:#482333;color:#ff8ba2}
+.export-choice b,.export-choice small{display:block}.export-choice b{font-size:13px}.export-choice small{font-size:10px;color:var(--muted);margin-top:4px}.export-arrow{margin-left:auto;font-size:20px;color:var(--muted)}
+body.light .export-choice{background:#f7f8fc}
