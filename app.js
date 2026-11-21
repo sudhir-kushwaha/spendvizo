@@ -83,7 +83,24 @@ function saveTransaction(e){
  state.transactions=old?state.transactions.map(t=>t.id===id?item:t):[item,...state.transactions];save();closeModal();render();toast(old?"Transaction updated.":"Transaction added.");
 }
 function deleteTransaction(id){const t=state.transactions.find(x=>x.id===id);if(!t)return;if(!confirm(`Delete "${t.description}"? This cannot be undone unless you have a backup.`))return;state.transactions=state.transactions.filter(x=>x.id!==id);save();render();toast("Transaction deleted.");}
-function exportCSV(){const rows=[["Date","Type","Category","Description","Amount"],...state.transactions.map(t=>[t.date,t.type,t.category,t.description,t.amount])];const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");download(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"}),"spendvizo-transactions.csv");toast("CSV exported.");}
+function openExportModal(){$("exportModal").classList.remove("hidden");}
+function closeExportModal(){$("exportModal").classList.add("hidden");}
+function reportRows(){return state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(t=>({Date:t.date,Type:t.type==="income"?"Income":"Expense",Category:t.category,Description:t.description,Amount:Number(t.amount)}));}
+function exportExcel(){
+ if(!window.XLSX){alert("Excel export library could not load. Check your internet connection and try again.");return;}
+ const rows=reportRows(),income=sum(state.transactions,"income"),expenses=sum(state.transactions,"expense");
+ const summary=[["Spendvizo – Expense Report"],["Generated",new Date().toLocaleString("en-IN")],["Total Income (INR)",income],["Total Expenses (INR)",expenses],["Net Balance (INR)",income-expenses],[],["Date","Type","Category","Description","Amount (INR)"],...rows.map(r=>[r.Date,r.Type,r.Category,r.Description,r.Amount])];
+ const sheet=XLSX.utils.aoa_to_sheet(summary);sheet["!cols"]=[{wch:16},{wch:14},{wch:22},{wch:32},{wch:18}];
+ const book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,sheet,"Expense Report");XLSX.writeFile(book,"spendvizo-expense-report.xlsx");closeExportModal();toast("Excel report downloaded.");
+}
+function exportPDF(){
+ if(!window.jspdf?.jsPDF){alert("PDF export library could not load. Check your internet connection and try again.");return;}
+ const {jsPDF}=window.jspdf,doc=new jsPDF(),rows=reportRows(),income=sum(state.transactions,"income"),expenses=sum(state.transactions,"expense");
+ doc.setFontSize(20);doc.text("Spendvizo - Expense Report",14,18);doc.setFontSize(10);doc.text(`Generated: ${new Date().toLocaleString("en-IN")}`,14,26);
+ doc.setFontSize(11);doc.text(`Total Income: INR ${income.toLocaleString("en-IN")}`,14,38);doc.text(`Total Expenses: INR ${expenses.toLocaleString("en-IN")}`,14,45);doc.text(`Net Balance: INR ${(income-expenses).toLocaleString("en-IN")}`,14,52);
+ doc.autoTable({startY:60,head:[["Date","Type","Category","Description","Amount (INR)"]],body:rows.map(r=>[r.Date,r.Type,r.Category,r.Description,Number(r.Amount).toLocaleString("en-IN")]),styles:{fontSize:8,cellPadding:2.5},headStyles:{fillColor:[105,65,198]},columnStyles:{0:{cellWidth:25},1:{cellWidth:22},2:{cellWidth:32},4:{halign:"right",cellWidth:27}}});
+ doc.save("spendvizo-expense-report.pdf");closeExportModal();toast("PDF report downloaded.");
+}
 function backup(){download(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),"spendvizo-backup.json");toast("Backup downloaded.");}
 function download(blob,name){const a=document.createElement("a"),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
 document.querySelectorAll(".nav-item[data-view]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
@@ -93,7 +110,7 @@ $("closeModal").addEventListener("click",closeModal);$("cancelModal").addEventLi
 document.querySelectorAll(".type-option").forEach(b=>b.addEventListener("click",()=>{$("transactionType").value=b.dataset.type;document.querySelectorAll(".type-option").forEach(x=>x.classList.toggle("active",x===b));fillCategories(b.dataset.type);}));
 document.addEventListener("click",e=>{const edit=e.target.closest("[data-edit]"),del=e.target.closest("[data-delete]");if(edit){const tx=state.transactions.find(t=>t.id===edit.dataset.edit);if(tx)openModal(tx);}if(del)deleteTransaction(del.dataset.delete);});
 $("budgetForm").addEventListener("submit",e=>{e.preventDefault();const n=Number($("budgetInput").value);if(!Number.isFinite(n)||n<0)return;state.budget=n;save();render();toast("Monthly budget saved.");});
-$("exportBtn").addEventListener("click",exportCSV);$("backupBtn").addEventListener("click",backup);$("restoreBtn").addEventListener("click",()=>$("restoreInput").click());
+$("exportBtn").addEventListener("click",openExportModal);$("closeExportModal").addEventListener("click",closeExportModal);$("cancelExport").addEventListener("click",closeExportModal);$("downloadExcel").addEventListener("click",exportExcel);$("downloadPDF").addEventListener("click",exportPDF);$("exportModal").addEventListener("click",e=>{if(e.target===$("exportModal"))closeExportModal();});$("backupBtn").addEventListener("click",backup);$("restoreBtn").addEventListener("click",()=>$("restoreInput").click());
 $("restoreInput").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.transactions)||typeof data.budget!=="number")throw Error();if(!confirm("Replace current Spendvizo data with this backup?"))return;state={transactions:data.transactions,budget:data.budget,theme:data.theme==="light"?"light":"dark"};save();applyTheme();render();toast("Backup restored.");}catch{alert("This backup file is not valid Spendvizo data.");}e.target.value="";});
 $("transactionSearch").addEventListener("input",renderAllTransactions);$("amountFilter").addEventListener("input",renderAllTransactions);$("categoryFilter").addEventListener("change",renderAllTransactions);$("typeFilter").addEventListener("change",renderAllTransactions);$("monthFilter").addEventListener("change",renderAllTransactions);
 $("clearFiltersBtn").addEventListener("click",()=>{$("transactionSearch").value="";$("amountFilter").value="";$("categoryFilter").value="all";$("typeFilter").value="all";$("monthFilter").value="all";$("globalSearch").value="";renderAllTransactions();});
@@ -102,5 +119,5 @@ $("themeBtn").addEventListener("click",()=>{state.theme=state.theme==="dark"?"li
 function applyTheme(){document.body.classList.toggle("light",state.theme==="light");$("themeBtn").textContent=state.theme==="light"?"☾":"☼";}
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
 $("transactionModal").addEventListener("click",e=>{if(e.target===$("transactionModal"))closeModal();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("globalSearch").focus();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeExportModal();}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("globalSearch").focus();}});
 $("year").textContent=new Date().getFullYear();fillCategories("expense");applyTheme();render();

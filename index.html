@@ -21,7 +21,7 @@
       </nav>
       <div class="side-label side-label-bottom">PREFERENCES</div>
       <nav class="nav">
-        <button class="nav-item" id="exportBtn"><span>⇩</span> Export CSV</button>
+        <button class="nav-item" id="exportBtn"><span>⇩</span> Download Report</button>
         <button class="nav-item" id="backupBtn"><span>◫</span> Backup data</button>
         <button class="nav-item" id="restoreBtn"><span>↥</span> Restore backup</button>
         <input type="file" id="restoreInput" accept="application/json" hidden>
@@ -98,7 +98,19 @@
       <p class="form-error" id="formError" role="alert"></p>
     </form>
   </div>
+  <div class="modal-backdrop hidden" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <div class="modal export-modal">
+      <div class="modal-heading"><div><span class="eyebrow">SPENDVIZO EXPORT</span><h2 id="exportTitle">Download Report</h2></div><button type="button" class="icon-btn" id="closeExportModal" aria-label="Close">×</button></div>
+      <p class="export-description">Choose the file format for your transaction report.</p>
+      <button type="button" class="export-choice" id="downloadExcel"><span class="export-choice-icon excel-icon">▦</span><span><b>Download as Excel</b><small>Spreadsheet file · .xlsx</small></span><span class="export-arrow">↓</span></button>
+      <button type="button" class="export-choice" id="downloadPDF"><span class="export-choice-icon pdf-icon">▤</span><span><b>Download as PDF</b><small>Printable report · .pdf</small></span><span class="export-arrow">↓</span></button>
+      <div class="modal-actions"><button type="button" class="secondary-btn" id="cancelExport">Cancel</button></div>
+    </div>
+  </div>
   <div class="toast" id="toast" role="status"></div>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
