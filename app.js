@@ -8,13 +8,14 @@ const ICONS = {"Food & Dining":"🍜","Transport":"🚕","Shopping":"🛍️","B
 const STORAGE_KEY = "spendvizo.v1";
 let state = loadState();
 let activeView = "dashboard";
+let selectedDashboardMonth = dateLocal().slice(0,7);
 let toastTimer;
 function loadState(){try{const x=JSON.parse(localStorage.getItem(STORAGE_KEY));return {transactions:Array.isArray(x?.transactions)?x.transactions:[],budget:Number(x?.budget)||0,theme:x?.theme==="light"?"light":"dark"};}catch{return {transactions:[],budget:0,theme:"dark"};}}
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function money(n){return new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(Number(n)||0);}
 function dateLocal(d=new Date()){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`;}
 function monthKey(date){return String(date||"").slice(0,7);}
-function currentMonthTx(){const m=dateLocal().slice(0,7);return state.transactions.filter(t=>monthKey(t.date)===m);}
+function currentMonthTx(month=selectedDashboardMonth){return state.transactions.filter(t=>monthKey(t.date)===month);}
 function sum(list,type){return list.filter(t=>t.type===type).reduce((a,t)=>a+Number(t.amount),0);}
 function toast(message){const el=$("toast");el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2400);}
 function escapeHTML(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -24,7 +25,8 @@ function openModal(tx){$("transactionModal").classList.remove("hidden");$("trans
 function closeModal(){$("transactionModal").classList.add("hidden");}
 function render(){
  const tx=currentMonthTx(),inc=sum(tx,"income"),exp=sum(tx,"expense"),net=inc-exp,left=state.budget-exp;
- $("currentMonth").textContent=new Date().toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+ if($("dashboardMonth").value!==selectedDashboardMonth)$("dashboardMonth").value=selectedDashboardMonth;
+ $("dashboardMonthWrap").classList.toggle("hidden",activeView!=="dashboard");
  $("incomeTotal").textContent=money(inc);$("expenseTotal").textContent=money(exp);$("balanceTotal").textContent=money(net);$("budgetRemaining").textContent=money(left);
  $("budgetFoot").textContent=state.budget?`${Math.max(0,Math.round(exp/state.budget*100))}% of monthly budget used`:"Set a monthly budget";
  $("donutTotal").textContent=money(exp);renderDonut(tx);renderCashflow();renderRows("recentRows",state.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5),false);
@@ -105,19 +107,21 @@ function backup(){download(new Blob([JSON.stringify(state,null,2)],{type:"applic
 function download(blob,name){const a=document.createElement("a"),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
 document.querySelectorAll(".nav-item[data-view]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.goto)));
-$("topAddBtn").addEventListener("click",()=>openModal());$("transactionsAddBtn").addEventListener("click",()=>openModal());
+$("topAddBtn").addEventListener("click",()=>openModal());$("mobileAddBtn").addEventListener("click",()=>openModal());$("transactionsAddBtn").addEventListener("click",()=>openModal());
 $("closeModal").addEventListener("click",closeModal);$("cancelModal").addEventListener("click",closeModal);$("transactionForm").addEventListener("submit",saveTransaction);
 document.querySelectorAll(".type-option").forEach(b=>b.addEventListener("click",()=>{$("transactionType").value=b.dataset.type;document.querySelectorAll(".type-option").forEach(x=>x.classList.toggle("active",x===b));fillCategories(b.dataset.type);}));
 document.addEventListener("click",e=>{const edit=e.target.closest("[data-edit]"),del=e.target.closest("[data-delete]");if(edit){const tx=state.transactions.find(t=>t.id===edit.dataset.edit);if(tx)openModal(tx);}if(del)deleteTransaction(del.dataset.delete);});
 $("budgetForm").addEventListener("submit",e=>{e.preventDefault();const n=Number($("budgetInput").value);if(!Number.isFinite(n)||n<0)return;state.budget=n;save();render();toast("Monthly budget saved.");});
-$("exportBtn").addEventListener("click",openExportModal);$("closeExportModal").addEventListener("click",closeExportModal);$("cancelExport").addEventListener("click",closeExportModal);$("downloadExcel").addEventListener("click",exportExcel);$("downloadPDF").addEventListener("click",exportPDF);$("exportModal").addEventListener("click",e=>{if(e.target===$("exportModal"))closeExportModal();});$("backupBtn").addEventListener("click",backup);$("restoreBtn").addEventListener("click",()=>$("restoreInput").click());
+$("exportBtn").addEventListener("click",()=>{$("sidebar").classList.remove("open");openExportModal();});$("closeExportModal").addEventListener("click",closeExportModal);$("cancelExport").addEventListener("click",closeExportModal);$("downloadExcel").addEventListener("click",exportExcel);$("downloadPDF").addEventListener("click",exportPDF);$("exportModal").addEventListener("click",e=>{if(e.target===$("exportModal"))closeExportModal();});$("backupBtn").addEventListener("click",()=>{$("sidebar").classList.remove("open");backup();});$("restoreBtn").addEventListener("click",()=>{$("sidebar").classList.remove("open");$("restoreInput").click();});
 $("restoreInput").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.transactions)||typeof data.budget!=="number")throw Error();if(!confirm("Replace current Spendvizo data with this backup?"))return;state={transactions:data.transactions,budget:data.budget,theme:data.theme==="light"?"light":"dark"};save();applyTheme();render();toast("Backup restored.");}catch{alert("This backup file is not valid Spendvizo data.");}e.target.value="";});
 $("transactionSearch").addEventListener("input",renderAllTransactions);$("amountFilter").addEventListener("input",renderAllTransactions);$("categoryFilter").addEventListener("change",renderAllTransactions);$("typeFilter").addEventListener("change",renderAllTransactions);$("monthFilter").addEventListener("change",renderAllTransactions);
 $("clearFiltersBtn").addEventListener("click",()=>{$("transactionSearch").value="";$("amountFilter").value="";$("categoryFilter").value="all";$("typeFilter").value="all";$("monthFilter").value="all";$("globalSearch").value="";renderAllTransactions();});
 $("globalSearch").addEventListener("input",()=>{if(activeView!=="transactions")setView("transactions");$("transactionSearch").value=$("globalSearch").value;renderAllTransactions();});
-$("themeBtn").addEventListener("click",()=>{state.theme=state.theme==="dark"?"light":"dark";save();applyTheme();});
-function applyTheme(){document.body.classList.toggle("light",state.theme==="light");$("themeBtn").textContent=state.theme==="light"?"☾":"☼";}
+function toggleTheme(){state.theme=state.theme==="dark"?"light":"dark";save();applyTheme();}
+$("themeBtn").addEventListener("click",toggleTheme);$("mobileThemeBtn").addEventListener("click",toggleTheme);
+function applyTheme(){document.body.classList.toggle("light",state.theme==="light");$("themeBtn").textContent=state.theme==="light"?"☾":"☼";$("mobileThemeBtn").textContent=state.theme==="light"?"☾":"☼";}
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+$("dashboardMonth").addEventListener("change",()=>{if(/^\d{4}-\d{2}$/.test($("dashboardMonth").value)){selectedDashboardMonth=$("dashboardMonth").value;render();}});
 $("transactionModal").addEventListener("click",e=>{if(e.target===$("transactionModal"))closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeExportModal();}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("globalSearch").focus();}});
-$("year").textContent=new Date().getFullYear();fillCategories("expense");applyTheme();render();
+$("year").textContent=new Date().getFullYear();$("dashboardMonth").value=selectedDashboardMonth;fillCategories("expense");applyTheme();render();

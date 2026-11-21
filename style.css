@@ -31,3 +31,48 @@ body.light .export-choice{background:#f7f8fc}
 .export-choice{min-height:68px;touch-action:manipulation}
 .export-choice:focus-visible{outline:3px solid #a78bfa;outline-offset:2px}
 @media(max-width:760px){.modal-backdrop{align-items:center;padding:12px}.export-modal{width:100%;max-width:440px;padding:20px}.export-choice{padding:15px;min-height:72px}.export-choice b{font-size:14px}.export-choice small{font-size:11px}}
+
+/* Spendvizo responsive brand + dashboard month selector */
+.mobile-top-row{display:none}
+.page-heading{display:flex;flex-direction:column;gap:4px;min-width:0}
+.page-title-line{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dashboard-month{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 11px;border:1px solid #49377d;border-radius:999px;background:#211b42;color:#cbbaff;font-size:11px;box-shadow:0 5px 18px #7044d322}
+.dashboard-month input{width:124px;min-width:0;border:0;outline:0;background:transparent;color:#e8ddff;font:600 11px 'DM Sans',sans-serif;color-scheme:dark;cursor:pointer}
+.dashboard-month input::-webkit-calendar-picker-indicator{filter:invert(.85) sepia(.3) saturate(2) hue-rotate(220deg);cursor:pointer}
+.brand-accent{color:#8b5cf6}
+.brand{color:#fff}
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s;width:280px;box-shadow:15px 0 40px #0008}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin:0;padding:0 18px}
+  .topbar{height:auto;min-height:0;padding:13px 0 15px;display:flex;flex-wrap:wrap;gap:12px;border-bottom:1px solid #202d48}
+  .mobile-top-row{display:flex;align-items:center;gap:11px;width:100%;min-height:48px}
+  .mobile-brand{display:flex;align-items:center;gap:9px;min-width:0;margin-right:auto;color:#fff;text-decoration:none;font:700 22px 'Space Grotesk',sans-serif;letter-spacing:-.8px;white-space:nowrap}
+  .mobile-brand .brand-mark{width:32px;height:32px;border-radius:10px;font-size:20px}
+  .mobile-menu{display:block;flex:0 0 auto;border:1px solid var(--line);background:#17213a;color:var(--text);border-radius:10px;width:42px;height:42px;padding:0;font-size:20px}
+  .mobile-theme-btn{display:block;flex:0 0 auto;width:40px;height:40px}
+  .mobile-add-btn{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;padding:0;font-size:25px;border-radius:13px}
+  .page-heading{width:100%;order:2;gap:5px}
+  .page-heading>.eyebrow{display:none}
+  .page-title-line{width:100%;justify-content:space-between;gap:8px;flex-wrap:nowrap}
+  .topbar h1{font-size:26px;margin:0}
+  .dashboard-month{min-height:38px;padding:0 10px;flex:0 0 auto}
+  .dashboard-month input{width:118px;font-size:11px}
+  .top-actions{display:none}
+  .view{padding-top:18px}
+  .welcome-row{margin-bottom:16px}
+  .welcome-row h2{font-size:18px}
+}
+@media(max-width:390px){
+  .main{padding:0 13px}
+  .mobile-brand{font-size:20px;gap:7px}
+  .mobile-brand .brand-mark{width:29px;height:29px;font-size:18px}
+  .mobile-top-row{gap:8px}
+  .mobile-menu{width:39px;height:39px}
+  .mobile-add-btn{flex-basis:43px;width:43px;height:43px}
+  .dashboard-month{gap:5px;padding:0 8px}
+  .dashboard-month input{width:108px;font-size:10px}
+  .topbar h1{font-size:23px}
+}
+body.light .dashboard-month{background:#f2edff;color:#6f4bb5;border-color:#d9cdfa}
+body.light .dashboard-month input{color:#4a3676;color-scheme:light}

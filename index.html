@@ -9,7 +9,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="description" content="Spendvizo — track expenses, manage budgets, and understand your money. No login required.">
   <title>Spendvizo — Personal Finance Tracker</title>
-  <link rel="stylesheet" href="style.css?v=20261121-3">
+  <link rel="stylesheet" href="style.css?v=20261121-4">
 </head>
 <body>
   <div class="app-shell">
@@ -35,17 +35,25 @@
 
     <main class="main">
       <header class="topbar">
-        <button class="mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
-        <div><div class="eyebrow">PERSONAL FINANCE</div><h1 id="pageTitle">Dashboard</h1></div>
+        <div class="mobile-top-row">
+          <button class="mobile-menu" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+          <a class="mobile-brand" href="#dashboard" aria-label="Spendvizo dashboard"><span class="brand-mark">S</span><span>Spend<span class="brand-accent">vizo</span></span></a>
+          <button class="icon-btn mobile-theme-btn" id="mobileThemeBtn" title="Toggle theme">☼</button>
+          <button class="primary-btn mobile-add-btn" id="mobileAddBtn" aria-label="Add transaction">＋</button>
+        </div>
+        <div class="page-heading">
+          <div class="eyebrow">PERSONAL FINANCE</div>
+          <div class="page-title-line"><h1 id="pageTitle">Dashboard</h1><label class="dashboard-month" id="dashboardMonthWrap" aria-label="Select dashboard month and year"><span aria-hidden="true">◷</span><input type="month" id="dashboardMonth" aria-label="Select month and year"></label></div>
+        </div>
         <div class="top-actions">
           <label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search transactions..." aria-label="Search transactions"></label>
           <button class="icon-btn" id="themeBtn" title="Toggle theme">☼</button>
-          <button class="primary-btn" id="topAddBtn">＋ Add transaction</button>
+          <button class="primary-btn desktop-add-btn" id="topAddBtn">＋ Add transaction</button>
         </div>
       </header>
 
       <section class="view active" id="dashboardView">
-        <div class="welcome-row"><div><h2>Good money habits start here.</h2><p>A simple view of where your money goes.</p></div><div class="month-chip">◷ <span id="currentMonth"></span></div></div>
+        <div class="welcome-row"><div><h2>Good money habits start here.</h2><p>A simple view of where your money goes.</p></div></div>
         <div class="stats-grid">
           <article class="stat-card income-card"><div class="stat-top"><span>Total income</span><span class="stat-icon">↙</span></div><div class="stat-value" id="incomeTotal">₹0</div><div class="stat-foot">Money received this month</div></article>
           <article class="stat-card expense-card"><div class="stat-top"><span>Total expenses</span><span class="stat-icon">↗</span></div><div class="stat-value" id="expenseTotal">₹0</div><div class="stat-foot">Money spent this month</div></article>
@@ -114,6 +122,6 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="app.js?v=20261121-3"></script>
+  <script src="app.js?v=20261121-4"></script>
 </body>
 </html>
